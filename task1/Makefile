@@ -1,5 +1,5 @@
-prog_func: main.cpp
+task1_float: main.cpp
 	g++ main.cpp -DUSE_FLOAT -o task1
 
-prog_double: main.cpp
+task1_double: main.cpp
 	g++ main.cpp -DUSE_DOUBLE -o task1
