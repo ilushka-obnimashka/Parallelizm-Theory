@@ -6,11 +6,11 @@
 2. Запустите CMake для конфигурации проекта :
    **Сборка с использованием `float`:**
    ```sh
-   cmake .. -DUSE_FLOAT
+   cmake .. -DUSE_FLOAT=ON
    ```
    **Сборка с использованием `double`:**
    ```sh
-   cmake .. -DUSE_DOUBLE
+   cmake .. -DUSE_DOUBLE=ON
    ```
 3. Соберите проект с помощью make:
    ```sh
