@@ -23,6 +23,6 @@ int main() {
 
     unsigned int end_time = clock();
 
-    std::cout << "time: " << end_time - start_time << std::endl;
+    std::cout << "time: " << 1.0 * (end_time - start_time)/ CLOCKS_PER_SEC << std::endl;
     std::cout << "sum: " << std::accumulate(arr.begin(), arr.end(), static_cast<my_type>(0)) << std::endl;
 }
