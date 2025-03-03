@@ -145,7 +145,7 @@ double IterationMethod() {
             if (stop) break; 
 
             //vecTemp = ITERATION_STEP * (matrixA*vecX - b)
-            MultiplyVecByScalar(vecTemp, kITERATION_STEP, lowerBound, upperBound);
+            MultiplyVecByScalar(vecTemp, kITERATION_STEPs, lowerBound, upperBound);
     
             //vecX -= ITERATION_STEP * (matrixA*vecX - b)
             SubtractVecFromVec(vecX, vecTemp, lowerBound, upperBound);
