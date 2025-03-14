@@ -164,8 +164,6 @@ double IterationMethod() {
 
         sumAbsoluteError += absoluteError;
         sumRelativeError += relativeError;
-
-        if (vecX[i] != 0)std::cout << vecX[i];
     }
 
     std::cout << "Sum of absolute errors: " << sumAbsoluteError << std::endl;
@@ -189,8 +187,6 @@ int main(int argc, char* argv[]) {
     
     double time = IterationMethod();
     std::cout << "Your calculations took " << std::fixed << std::setprecision(4) << time << " seconds." << std::endl;
-    
-    std::cout << "Matrix size: " << MATRIX_SIZE << "x" << MATRIX_SIZE << "\n";
     
     return 0;
 }
