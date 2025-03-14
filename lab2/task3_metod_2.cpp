@@ -140,8 +140,6 @@ double IterationMethod() {
                 numerator = 0.0; 
             }
 
-            #pragma omp barrier
-
             if (stop) break; 
 
             //vecTemp = ITERATION_STEP * (matrixA*vecX - b)
