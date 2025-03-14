@@ -152,9 +152,6 @@ double IterationMethod() {
     long double sumAbsoluteError = 0.0;
     long double sumRelativeError = 0.0;
 
-    // Calculation of absolute and relative errors
-    std::cout << "Solution x (first 10 elements): ";
-
     #pragma omp parallel for num_threads(NTHREADS) schedule(dynamic) reduction(+:sumAbsoluteError, sumRelativeError)
     for (int i = 0; i < MATRIX_SIZE; i++) {
         long double absoluteError = std::abs(vecX[i] - 1.0);
@@ -162,11 +159,8 @@ double IterationMethod() {
         
         sumAbsoluteError += absoluteError;
         sumRelativeError += relativeError;
-
-        if (vecX[i] != 0)std::cout <<vecX[i] <<" ";
     }
-
-    std::cout << std::endl;
+    
     std::cout << "Number of iterations performed: " << iterationCount << std::endl;
     std::cout << "Sum of absolute errors: " << sumAbsoluteError << std::endl;
     std::cout << "Sum of relative errors: " << sumRelativeError << std::endl;
@@ -189,8 +183,6 @@ int main(int argc, char* argv[]) {
 
     double time = IterationMethod();
     std::cout << "Your calculations took " << std::fixed << std::setprecision(4) << time << " seconds." << std::endl;
-
-    std::cout << "Matrix size: " << MATRIX_SIZE << "x" << MATRIX_SIZE << "\n";
-
+    
     return 0;
 }
