@@ -27,7 +27,7 @@ std::string getTypeName(const std::type_info &type) {
 }
 
 template<typename Tserver, typename Tclient>
-std::string formatMessage(size_t taskId, Tclient arg1, Tclient *arg2 = nullptr, const std::string& operationName) {
+std::string formatMessage(size_t taskId, Tclient arg1, const std::string& operationName, Tclient *arg2) {
     std::string typeNameServer = getTypeName(typeid(Tserver));
     std::string typeNameClient = getTypeName(typeid(Tclient));
 
@@ -35,7 +35,7 @@ std::string formatMessage(size_t taskId, Tclient arg1, Tclient *arg2 = nullptr, 
         return std::to_string(taskId) + "," + typeNameServer + "," + typeNameClient + ",pow," +
                std::to_string(static_cast<double>(arg1)) + "," + std::to_string(static_cast<double>(*arg2));
     } else {
-        return std::to_string(taskId) + "," + typeNameServer + "," + typeNameClient + "," + operationName
+        return std::to_string(taskId) + "," + typeNameServer + "," + typeNameClient + operationName +
                std::to_string(static_cast<double>(arg1));
     }
 }
@@ -63,7 +63,7 @@ size_t SinClient<Tclient, Tserver>::Client2ServerTask(Server<Tserver> &server) {
     int delay_ms = this->GenerateRandom(1000, 4000);
     size_t task_id = server.AddTask([arg, delay_ms] { return MathFunctions::FunSin(arg, delay_ms); });
 
-    safePrint(this->out_, formatMessage<Tserver, Tclient>(task_id, arg, "sin"));
+    safePrint(this->out_, formatMessage<Tserver, Tclient>(task_id, arg, ",sin,"));
 
     return task_id;
 }
@@ -77,7 +77,7 @@ size_t SqrtClient<Tclient, Tserver>::Client2ServerTask(Server<Tserver> &server) 
     int delay_ms = this->GenerateRandom(1000, 4000);
     size_t task_id = server.AddTask([arg, delay_ms] { return MathFunctions::FunSqrt(arg, delay_ms); });
 
-    safePrint(this->out_, formatMessage<Tserver, Tclient>(task_id, arg, "sqrt"));
+    safePrint(this->out_, formatMessage<Tserver, Tclient>(task_id, arg, ",sqrt,"));
 
     return task_id;
 }
@@ -94,7 +94,7 @@ size_t PowClient<Tclient, Tserver>::Client2ServerTask(Server<Tserver> &server) {
     int delay_ms = this->GenerateRandom(1000, 4000);
     size_t task_id = server.AddTask([x, y, delay_ms] { return MathFunctions::FunPow(x, y, delay_ms); });
 
-    safePrint(this->out_, formatMessage<Tserver, Tclient>(task_id, x, &y));
+    safePrint(this->out_, formatMessage<Tserver, Tclient>(task_id, x, "sin", &y));
 
     return task_id;
 }
