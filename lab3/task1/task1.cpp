@@ -49,7 +49,7 @@ void fatal(char *message) {
  */
 void *xmalloc(size_t size) {
     register void *value = malloc(size);
-    if (value == 0) fatal("Virtuel memory exhausted");
+    if (value == 0) fatal("Virtual memory exhausted");
     return value;
 }
 
