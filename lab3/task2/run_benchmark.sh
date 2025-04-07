@@ -1,5 +1,5 @@
 
-VENV_NAME="lab3"
+VENV_NAME="lab3venv"
 REQUIREMENTS_FILE="requirements.txt"
 PYTHON_SCRIPT="benchmark.py"
 
