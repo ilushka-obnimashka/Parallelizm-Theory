@@ -14,7 +14,7 @@ void safePrint(std::ofstream& out, const std::string &message);
 std::string getTypeName(const std::type_info &type);
 
 template<typename Tserver, typename Tclient>
-std::string formatMessage(size_t taskId, Tclient arg1, Tclient *arg2 = nullptr, const std::string& operationName);
+std::string formatMessage(size_t taskId,const std::string& operationName, Tclient arg1, Tclient *arg2 = nullptr);
 
 template<typename Tclient, typename Tserver>
 class Client {
