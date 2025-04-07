@@ -22,7 +22,7 @@
 #include <vector>
 #define CONTAINER std::vector
 #elif THREAD_CONTAINER == 2
-#include <vector>  // Using vector instead of array for dynamic size
+#include <array> 
 #define CONTAINER std::vector
 #elif THREAD_CONTAINER == 3
 #include <deque>
@@ -95,25 +95,16 @@ void ParallelInitVec(long double *vec, const int lowerBound, const int upperBoun
  * @brief Initializes matrix and vectors in parallel using multiple threads.
  */
 void ParallelDataInitialization(long double *matrix, long double *vec1) {
-    CONTAINER<std::jthread> threads;
+    CONTAINER<std::jthread> threads(NTHREADS);  // Use vector instead of array for threads
     int items_per_thread = MATRIX_SIZE / NTHREADS;
 
-    // Create threads dynamically using push_front for all containers except std::forward_list
     for (size_t i = 0; i < NTHREADS; i++) {
         int lb = i * items_per_thread;
         int ub = (i == NTHREADS - 1) ? (MATRIX_SIZE - 1) : (lb + items_per_thread - 1);
-
-        if constexpr (THREAD_CONTAINER == 5) {
-            threads.push_front(std::jthread([matrix, vec1, lb, ub] {
-                ParallelInitMatrix(matrix, lb, ub);
-                ParallelInitVec(vec1, lb, ub);
-            }));
-        } else {
-            threads.push_back(std::jthread([matrix, vec1, lb, ub] {
-                ParallelInitMatrix(matrix, lb, ub);
-                ParallelInitVec(vec1, lb, ub);
-            }));
-        }
+        threads[i] = std::jthread([matrix, vec1, lb, ub] {
+            ParallelInitMatrix(matrix, lb, ub);
+            ParallelInitVec(vec1, lb, ub);
+        });
     }
 }
 
@@ -132,19 +123,13 @@ void InitTestData(long double *&a, long double *&b, long double *&c) {
  * @brief Computes matrix-vector multiplication in parallel using multiple threads.
  */
 void ParallelMatrixVectorMultiply(const long double *a, const long double *b, long double *c) {
-    CONTAINER<std::jthread> threads;
+    CONTAINER<std::jthread> threads(NTHREADS);  // Use vector instead of array for threads
     int items_per_thread = MATRIX_SIZE / NTHREADS;
 
-    // Create threads dynamically using push_front for all containers except std::forward_list
     for (size_t i = 0; i < NTHREADS; i++) {
         int lb = i * items_per_thread;
         int ub = (i == NTHREADS - 1) ? (MATRIX_SIZE - 1) : (lb + items_per_thread - 1);
-
-        if constexpr (THREAD_CONTAINER == 5) {
-            threads.push_front(std::jthread(MatrixVectorProductThread, a, b, c, lb, ub));
-        } else {
-            threads.push_back(std::jthread(MatrixVectorProductThread, a, b, c, lb, ub));
-        }
+        threads[i] = std::jthread(MatrixVectorProductThread, a, b, c, lb, ub);
     }
 }
 
