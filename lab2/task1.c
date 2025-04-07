@@ -16,7 +16,7 @@
 
 /**
  * @brief Displays an error message in Stderr.
-  * @param message Error message.
+ * @param message Error message.
  */
 void fatal(char *message) {
     fprintf(stderr, "%s", message);
@@ -35,7 +35,6 @@ void *xmalloc(size_t size) {
 }
 
  
-
 /**
  * @brief Returns the current time in seconds.
  *        Time is measured using a system call.
@@ -50,10 +49,10 @@ double cpuSecond()
 }
 
 /**
- * @brief Compute matrix-vector product c[m] = a[m][n] * b[n].
+ * @briefCompute matrix-vector product vecRes[MATRIX_SIZE] = matrix[MATRIX_SIZE][MATRIX_SIZE] * vec[MATRIX_SIZE].
  * @warning the matrix must be represented in linear form.
  */
-void matrix_vector_product_omp(double *a, double *b, double *c, int m, int n) {
+void MatrixVectorProductOmp(double *a, double *b, double *c, int m, int n) {
 #pragma omp parallel num_threads(NTHREADS)
     {
         int tid = omp_get_thread_num();
@@ -81,7 +80,7 @@ void matrix_vector_product_omp(double *a, double *b, double *c, int m, int n) {
  *        by the vector.
  * @return returns the minimum time (20 launches) spent on executing the parallel part.
  */
-void time_check_parallel() {
+void TimeCheckParallel() {
     double *a, *b, *c;
 
     a = xmalloc(sizeof(*a) * MATRIX_SIZE * MATRIX_SIZE);
@@ -104,12 +103,13 @@ void time_check_parallel() {
     for (int j = 0; j < MATRIX_SIZE; j++)
         b[j] = j;
 
-
-    double start = cpuSecond();
     double min_time = 1000000000;
 
     for (int i = 0; i<20; i++){
-        matrix_vector_product_omp(a, b, c, MATRIX_SIZE, MATRIX_SIZE);
+
+        double start = cpuSecond();
+
+        MatrixVectorProductOmp(a, b, c, MATRIX_SIZE, MATRIX_SIZE);
         
         double stop = cpuSecond();
 
@@ -132,5 +132,5 @@ int main() {
     printf("Memory used: %" PRIu64 " MiB\n", ((m * n + m + n) * sizeof(double)) >> 20);
     printf("Number of threads: %d\n", NTHREADS);
     
-    time_check_parallel();
+    TimeCheckParallel();
 }

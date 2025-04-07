@@ -17,6 +17,7 @@
 
 const double kITERATION_STEP = 1.0 / 100000.0;
 double epsilon = 0.00001;
+const int kMAX_ITERATIONS = 10000000; 
 
 /**
  * @brief Returns the current time in seconds.
@@ -34,7 +35,7 @@ double CpuSecond() {
  * @brief Compute matrix-vector product vecRes[MATRIX_SIZE] = matrix[MATRIX_SIZE][MATRIX_SIZE] * vec[MATRIX_SIZE].
  * @warning the matrix must be represented in linear form.
  */
-void MatrixVectorProductOmp(const long double *matrix, long double *vec, long double *vecRes, int &lowerBound, int &upperBound) {
+void MatrixVectorProductOmp(const long double *matrix, const long double *vec, long double *vecRes, int &lowerBound, int &upperBound) {
     for (int i = lowerBound; i <= upperBound; i++) {
         vecRes[i] = 0;
         for (int j = 0; j < MATRIX_SIZE; j++) {
@@ -129,7 +130,6 @@ double IterationMethod() {
 
             #pragma omp atomic
             numerator += numeratorPart;
-
             #pragma omp barrier
 
             #pragma omp single
@@ -137,13 +137,24 @@ double IterationMethod() {
                 if (sqrt(numerator) < epsilon) {
                     stop = true; 
                 }
+
+                if (iterationCount >= MAX_ITERATIONS) {
+                    std::cerr << "Error: Exceeded maximum number of iterations (" << MAX_ITERATIONS << ")." << std::endl;
+                    delete[] matrixAData;
+                    delete[] vecBData;
+                    delete[] vecX;
+                    delete[] vecTemp;
+                    exit(13);
+                }
+
                 numerator = 0.0; 
             }
+
 
             if (stop) break; 
 
             //vecTemp = ITERATION_STEP * (matrixA*vecX - b)
-            MultiplyVecByScalar(vecTemp, kITERATION_STEPs, lowerBound, upperBound);
+            MultiplyVecByScalar(vecTemp, kITERATION_STEP, lowerBound, upperBound);
     
             //vecX -= ITERATION_STEP * (matrixA*vecX - b)
             SubtractVecFromVec(vecX, vecTemp, lowerBound, upperBound);

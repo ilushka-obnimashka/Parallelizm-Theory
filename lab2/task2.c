@@ -36,7 +36,7 @@ double f(double x){
  * @brief Compute integral[a,b]f(x)dx using the parallel numerical
  *  midpoint rectangle method.
  */
-double parallel_integral (double a, double b, double(*f)(double)){
+double ParallelIntegral(double a, double b, double(*f)(double)){
 
     double h = (b-a)/nsteps;
     double sum = 0.0;
@@ -68,7 +68,7 @@ double parallel_integral (double a, double b, double(*f)(double)){
  * @return returns the minimum time (20 launches) spent on executing 
  *          the parallel part .
  */
-void time_check_parallel() {
+void TimeCheckParallel() {
 
     double a = 10;
     printf("Integration f(x) on [%.12f, %.12f], nsteps = %d\n", -a, a, nsteps);
@@ -78,7 +78,7 @@ void time_check_parallel() {
 
     for (int i = 0; i<20; i++){
         double start = cpuSecond();
-        result = parallel_integral(-a, a, f);
+        result = ParallelIntegral(-a, a, f);
         double stop = cpuSecond();
         min_time = (min_time < (stop - start)) ? min_time : stop - start;
     }
@@ -90,5 +90,5 @@ void time_check_parallel() {
 
 int main(){
     printf("Number of threads: %d\n", NTHREADS);
-    time_check_parallel();
+    TimeCheckParallel();
 }

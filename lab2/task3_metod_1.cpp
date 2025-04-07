@@ -17,7 +17,7 @@
 
 const double kITERATION_STEP = 1.0 / 100000.0;
 double epsilon = 0.00001;
-const int MAX_ITERATIONS = 10000000; // Максимальное число итераций
+const int kMAX_ITERATIONS = 10000000; 
 
 /**
  * @brief Returns the current time in seconds.
@@ -27,7 +27,7 @@ const int MAX_ITERATIONS = 10000000; // Максимальное число ит
  */
 double CpuSecond() {
     struct timespec ts;
-    timespec_get(&ts, TIME_UTC);
+    timespec_get(&ts, TIME_UTC);`
     return ((double)ts.tv_sec + (double)ts.tv_nsec * 1.e-9);
 }
 
@@ -35,9 +35,8 @@ double CpuSecond() {
  * @brief Computes the matrix-vector product vecRes[MATRIX_SIZE] = matrix[MATRIX_SIZE][MATRIX_SIZE] * vec[MATRIX_SIZE].
  * @warning The matrix must be represented in linear form.
  */
-void MatrixVectorProductOmp(const long double *matrix, long double *vec, long double *vecRes) {
-    // Parallel computation of the matrix-vector product
-    #pragma omp parallel for num_threads(NTHREADS) schedule(dynamic)
+void MatrixVectorProductOmp(const long double *matrix, const long double *vec, long double *vecRes) {
+    #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for (size_t i = 0; i < MATRIX_SIZE; i++) {
         vecRes[i] = 0;
         for (size_t j = 0; j < MATRIX_SIZE; j++) {
@@ -51,8 +50,7 @@ void MatrixVectorProductOmp(const long double *matrix, long double *vec, long do
  * @warning Both vectors must have the same size.
  */
 void SubtractVecFromVec(long double *vec1, const long double *vec2) {
-    // Parallel subtraction of vectors
-    #pragma omp parallel for num_threads(NTHREADS) schedule(dynamic)
+    #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for (size_t i = 0; i < MATRIX_SIZE; i++) {
         vec1[i] -= vec2[i];
     }
@@ -62,8 +60,7 @@ void SubtractVecFromVec(long double *vec1, const long double *vec2) {
  * @brief Computes the scalar-vector product vec[MATRIX_SIZE] *= scalar.
  */
 void MultiplyVecByScalar(long double *vec, const long double &scalar) {
-    // Parallel multiplication of a vector by a scalar
-    #pragma omp parallel for num_threads(NTHREADS) schedule(dynamic)
+    #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for (size_t i = 0; i < MATRIX_SIZE; i++) {
         vec[i] *= scalar;
     }
@@ -75,9 +72,7 @@ void MultiplyVecByScalar(long double *vec, const long double &scalar) {
  */
 double VecL2Norm(const long double *vec) {
     long double l2Norm = 0.0;
-
-    // Parallel computation of the L2 norm with reduction
-    #pragma omp parallel for num_threads(NTHREADS) schedule(dynamic) reduction(+:l2Norm)
+    #pragma omp parallel for num_threads(NTHREADS) schedule(static) reduction(+:l2Norm)
     for (size_t i = 0; i < MATRIX_SIZE; i++) {
         l2Norm += vec[i] * vec[i];
     }
@@ -96,7 +91,7 @@ double IterationMethod() {
     long double* vecTemp = new long double[MATRIX_SIZE];
 
     // Initialization of matrix A
-    #pragma omp parallel for num_threads(NTHREADS) schedule(dynamic)
+    #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for (size_t i = 0; i < MATRIX_SIZE; i++) {
         for (size_t j = 0; j < MATRIX_SIZE; j++) {
             matrixAData[i * MATRIX_SIZE + j] = (i == j) ? 2.0 : 1.0;
@@ -104,7 +99,7 @@ double IterationMethod() {
     }
 
     // Initialization of vectors b and x
-    #pragma omp parallel for num_threads(NTHREADS) schedule(dynamic)
+    #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for (size_t i = 0; i < MATRIX_SIZE; i++) {
         vecBData[i] = MATRIX_SIZE + 1;
         vecX[i] = 0.0;
@@ -113,12 +108,11 @@ double IterationMethod() {
     const long double* matrixA = matrixAData;
     const long double* vecB = vecBData;
 
-    printf("%f", VecL2Norm(vecB));
     epsilon *= VecL2Norm(vecB);
 
     int iterationCount = 0;
 
-    double start = CpuSecond();
+    double startTime = CpuSecond();
 
     while (iterationCount++ >= 0) {
         // vecTemp = matrixA * vecX
@@ -131,7 +125,7 @@ double IterationMethod() {
         if (VecL2Norm(vecTemp) < epsilon) break;
 
         // Check for exceeding the maximum number of iterations
-        if (iterationCount >= MAX_ITERATIONS) {
+        if (iterationCount >= kMAX_ITERATIONS) {
             std::cerr << "Error: Exceeded maximum number of iterations (" << MAX_ITERATIONS << ")." << std::endl;
             delete[] matrixAData;
             delete[] vecBData;
@@ -147,12 +141,12 @@ double IterationMethod() {
         SubtractVecFromVec(vecX, vecTemp);
     }
 
-    double end = CpuSecond();
+    double endTime = CpuSecond();
 
     long double sumAbsoluteError = 0.0;
     long double sumRelativeError = 0.0;
 
-    #pragma omp parallel for num_threads(NTHREADS) schedule(dynamic) reduction(+:sumAbsoluteError, sumRelativeError)
+    #pragma omp parallel for num_threads(NTHREADS) schedule(static) reduction(+:sumAbsoluteError, sumRelativeError)
     for (int i = 0; i < MATRIX_SIZE; i++) {
         long double absoluteError = std::abs(vecX[i] - 1.0);
         long double relativeError = std::abs((vecX[i] - 1.0) / 1.0);
@@ -160,7 +154,8 @@ double IterationMethod() {
         sumAbsoluteError += absoluteError;
         sumRelativeError += relativeError;
     }
-    
+
+    std::cout << std::endl;
     std::cout << "Number of iterations performed: " << iterationCount << std::endl;
     std::cout << "Sum of absolute errors: " << sumAbsoluteError << std::endl;
     std::cout << "Sum of relative errors: " << sumRelativeError << std::endl;
@@ -170,7 +165,7 @@ double IterationMethod() {
     delete[] vecX;
     delete[] vecTemp;
 
-    return end - start;
+    return endTime - startTime;
 }
 
 int main(int argc, char* argv[]) {
@@ -183,6 +178,6 @@ int main(int argc, char* argv[]) {
 
     double time = IterationMethod();
     std::cout << "Your calculations took " << std::fixed << std::setprecision(4) << time << " seconds." << std::endl;
-    
+
     return 0;
 }
