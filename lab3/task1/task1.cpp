@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <thread>
 #include <cinttypes>
+#include <vector>
+#include <array>
+#include <deque>
+#include <list>
+#include <forward_list>
 
 #ifdef NTHREADS
 #else
@@ -17,8 +22,8 @@
 #include <vector>
 #define CONTAINER std::vector
 #elif THREAD_CONTAINER == 2
-#include <array>
-#define CONTAINER std::array
+#include <vector>  // Using vector instead of array for dynamic size
+#define CONTAINER std::vector
 #elif THREAD_CONTAINER == 3
 #include <deque>
 #define CONTAINER std::deque
@@ -37,7 +42,7 @@
  * @brief Displays an error message in Stderr.
  * @param message Error message.
  */
-void fatal(char *message) {
+void fatal(const char *message) {
     fprintf(stderr, "%s", message);
     exit(13);
 }
@@ -48,8 +53,8 @@ void fatal(char *message) {
  * @param size Size isolated memory.
  */
 void *xmalloc(size_t size) {
-    register void *value = malloc(size);
-    if (value == 0) fatal("Virtual memory exhausted");
+    void *value = malloc(size);
+    if (value == nullptr) fatal("Virtual memory exhausted");
     return value;
 }
 
@@ -90,16 +95,27 @@ void ParallelInitVec(long double *vec, const int lowerBound, const int upperBoun
  * @brief Initializes matrix and vectors in parallel using multiple threads.
  */
 void ParallelDataInitialization(long double *matrix, long double *vec1) {
-    CONTAINER<std::jthread> threads(NTHREADS);
+    CONTAINER<std::jthread> threads;
     int items_per_thread = MATRIX_SIZE / NTHREADS;
 
+    // Create threads dynamically using iterators for non-indexable containers like list and forward_list
     for (size_t i = 0; i < NTHREADS; i++) {
         int lb = i * items_per_thread;
         int ub = (i == NTHREADS - 1) ? (MATRIX_SIZE - 1) : (lb + items_per_thread - 1);
-        threads[i] = std::jthread([matrix, vec1, lb, ub] {
-            ParallelInitMatrix(matrix, lb, ub);
-            ParallelInitVec(vec1, lb, ub);
-        });
+
+        if constexpr (std::is_same_v<CONTAINER<std::jthread>, std::list<std::jthread>> || 
+                      std::is_same_v<CONTAINER<std::jthread>, std::forward_list<std::jthread>>) {
+            // For list and forward_list, we need to use push_front instead of push_back
+            threads.push_front(std::jthread([matrix, vec1, lb, ub] {
+                ParallelInitMatrix(matrix, lb, ub);
+                ParallelInitVec(vec1, lb, ub);
+            }));
+        } else {
+            threads.push_back(std::jthread([matrix, vec1, lb, ub] {
+                ParallelInitMatrix(matrix, lb, ub);
+                ParallelInitVec(vec1, lb, ub);
+            }));
+        }
     }
 }
 
@@ -118,13 +134,21 @@ void InitTestData(long double *&a, long double *&b, long double *&c) {
  * @brief Computes matrix-vector multiplication in parallel using multiple threads.
  */
 void ParallelMatrixVectorMultiply(const long double *a, const long double *b, long double *c) {
-    CONTAINER<std::jthread> threads(NTHREADS);
+    CONTAINER<std::jthread> threads;
     int items_per_thread = MATRIX_SIZE / NTHREADS;
 
+    // Create threads dynamically using iterators for non-indexable containers like list and forward_list
     for (size_t i = 0; i < NTHREADS; i++) {
         int lb = i * items_per_thread;
         int ub = (i == NTHREADS - 1) ? (MATRIX_SIZE - 1) : (lb + items_per_thread - 1);
-        threads[i] = std::jthread(MatrixVectorProductThread, a, b, c, lb, ub);
+
+        if constexpr (std::is_same_v<CONTAINER<std::jthread>, std::list<std::jthread>> || 
+                      std::is_same_v<CONTAINER<std::jthread>, std::forward_list<std::jthread>>) {
+            // For list and forward_list, we need to use push_front instead of push_back
+            threads.push_front(std::jthread(MatrixVectorProductThread, a, b, c, lb, ub));
+        } else {
+            threads.push_back(std::jthread(MatrixVectorProductThread, a, b, c, lb, ub));
+        }
     }
 }
 
