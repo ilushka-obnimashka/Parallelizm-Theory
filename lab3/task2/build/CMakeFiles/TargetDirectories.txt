@@ -1,3 +1,0 @@
-/home/i.trushkin/Parallelizm-Theory/lab3/task2/build/CMakeFiles/task2.dir
-/home/i.trushkin/Parallelizm-Theory/lab3/task2/build/CMakeFiles/edit_cache.dir
-/home/i.trushkin/Parallelizm-Theory/lab3/task2/build/CMakeFiles/rebuild_cache.dir

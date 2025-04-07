@@ -98,14 +98,12 @@ void ParallelDataInitialization(long double *matrix, long double *vec1) {
     CONTAINER<std::jthread> threads;
     int items_per_thread = MATRIX_SIZE / NTHREADS;
 
-    // Create threads dynamically using iterators for non-indexable containers like list and forward_list
+    // Create threads dynamically using push_front for all containers except std::forward_list
     for (size_t i = 0; i < NTHREADS; i++) {
         int lb = i * items_per_thread;
         int ub = (i == NTHREADS - 1) ? (MATRIX_SIZE - 1) : (lb + items_per_thread - 1);
 
-        if constexpr (std::is_same_v<CONTAINER<std::jthread>, std::list<std::jthread>> || 
-                      std::is_same_v<CONTAINER<std::jthread>, std::forward_list<std::jthread>>) {
-            // For list and forward_list, we need to use push_front instead of push_back
+        if constexpr (THREAD_CONTAINER == 5) {
             threads.push_front(std::jthread([matrix, vec1, lb, ub] {
                 ParallelInitMatrix(matrix, lb, ub);
                 ParallelInitVec(vec1, lb, ub);
@@ -137,14 +135,12 @@ void ParallelMatrixVectorMultiply(const long double *a, const long double *b, lo
     CONTAINER<std::jthread> threads;
     int items_per_thread = MATRIX_SIZE / NTHREADS;
 
-    // Create threads dynamically using iterators for non-indexable containers like list and forward_list
+    // Create threads dynamically using push_front for all containers except std::forward_list
     for (size_t i = 0; i < NTHREADS; i++) {
         int lb = i * items_per_thread;
         int ub = (i == NTHREADS - 1) ? (MATRIX_SIZE - 1) : (lb + items_per_thread - 1);
 
-        if constexpr (std::is_same_v<CONTAINER<std::jthread>, std::list<std::jthread>> || 
-                      std::is_same_v<CONTAINER<std::jthread>, std::forward_list<std::jthread>>) {
-            // For list and forward_list, we need to use push_front instead of push_back
+        if constexpr (THREAD_CONTAINER == 5) {
             threads.push_front(std::jthread(MatrixVectorProductThread, a, b, c, lb, ub));
         } else {
             threads.push_back(std::jthread(MatrixVectorProductThread, a, b, c, lb, ub));

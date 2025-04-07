@@ -11,4 +11,4 @@ FORCE:
 
 
 #запускать:
-# make task1 MATRIX_SIZE=n NTHREADS = y THREAD_CONTAINER = h
+# make build/task1 MATRIX_SIZE=n NTHREADS = y THREAD_CONTAINER = h
