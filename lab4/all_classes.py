@@ -130,26 +130,12 @@ class SensorX:
         return self._data
 
 
-
-@SensorXAdapter(name="SensorX")
-class SensorX():
-    def __init__(self, delay):
-        self._delay = delay
-        self._data = 0
-
-    def get(self) -> int:
-        time.sleep(self._delay)
-        self._data = self._data + 1
-        return self._data
-
-
 class WindowImage:
     def __init__(self, display_freq):
         self.display_freq = display_freq
         self.window_name = "Sensor Display"
         self._last_update = 0
         cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
-        self.last_values = {}
 
     def show(self, camera_frame, sensor_values):
         current_time = time.time()
